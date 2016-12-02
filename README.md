@@ -28,20 +28,20 @@ The size-4's should go:
 - C (currently fourth)
 - hockey stick (currently second)
 
-Circle position # appearances Size MOI
---------------- ------------- ---- ----
-1               25,968,845    1    0.0
-2               5,669,059     2    0.5
-3               398,327       3    2.1
-4               190,875       3    2.0
-5               229,673       3    1.3
-6               22,243        4    3.2
-7               7,818         4    5.0
-8               10,679        4    5.3
-9               9,015         4    2.5
-10              6,420         4    4.2
-11              2,928         4    3.0
-12              0             4    10.0
+| Circle position | # appearances | Size | MOI  |
+|-----------------|---------------|------|------|
+| 1               | 25,968,845    | 1    | 0.0  |
+| 2               | 5,669,059     | 2    | 0.5  |
+| 3               | 398,327       | 3    | 2.1  |
+| 4               | 190,875       | 3    | 2.0  |
+| 5               | 229,673       | 3    | 1.3  |
+| 6               | 22,243        | 4    | 3.2  |
+| 7               | 7,818         | 4    | 5.0  |
+| 8               | 10,679        | 4    | 5.3  |
+| 9               | 9,015         | 4    | 2.5  |
+| 10              | 6,420         | 4    | 4.2  |
+| 11              | 2,928         | 4    | 3.0  |
+| 12              | 0             | 4    | 10.0 |
 
 Of course, it could be that the shapes are based on some combination of energy
 *and* entropy (i.e., the hexes are repulsive). For example, even though the
