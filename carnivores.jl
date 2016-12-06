@@ -19,9 +19,30 @@ Hex(q, r) = Hex(q, r, -q - r)
 /(h::Hex, a::Float64) = (1.0 / a) * h
 
 """
+Rotate a hex clockwise by 60 degrees (about the origin)
+"""
+rotate_60(h::Hex) = Hex(-h.z, -h.x, -h.y)
+function rotate_60(h::Hex, times::Int)
+    o = h
+    for i in 1:times
+        o = rotate_60(o)
+    end
+    o
+end
+
+"""
 Distance between two hexes `a` and `b`
 """
 dist(a::Hex, b::Hex)::Float64 = max(abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z))
+
+"""
+Distance, but accounting for periodic boundary conditions on a grid of radius `r`
+"""
+function dist(a::Hex, b::Hex, r::Int)::Float
+    mirror_centers = [rotate_60(Hex(2r + 1, -r, -r - 1), i) for i in 0:5]
+    translated_bs = [b - c for c in mirror_centers]
+    minimum([max(abs(a.x - bb.x), abs(a.y - bb.y), abs(a.z - bb.z)) for bb in translated_bs])
+end
 
 """
 Center of mass of an list of hexes
@@ -99,28 +120,32 @@ simulate = function(n_trials, n_tiles, max_coord)
     return dat
 end
 
-# generate the data
-dat = simulate(1e7, 4, 3)
+function report(n_trials, radius)
+    # generate the data
+    dat = simulate(n_trials, 4, radius)
 
-# the list of shapes in the circle of life
-const shapes = [(1, 0.0),
-                (2, 0.5),
-                (3, 2.1), (3, 2.0), (3, 1.3),
-                (4, 3.2), (4, 5.0), (4, 5.3), (4, 2.5), (4, 4.2), (4, 3.0), (4, 10.0)]
+    # the list of shapes in the circle of life
+    const shapes = [(1, 0.0),
+                    (2, 0.5),
+                    (3, 2.1), (3, 2.0), (3, 1.3),
+                    (4, 3.2), (4, 5.0), (4, 5.3), (4, 2.5), (4, 4.2), (4, 3.0), (4, 10.0)]
 
 
-# check that all the shapes in the simulation data are present in the circle of life
-for k in keys(dat)
-    if !(k in shapes)
-        throw("missing $(k)")
+    # check that all the shapes in the simulation data are present in the circle of life
+    for k in keys(dat)
+        if !(k in shapes)
+            throw("missing $(k)")
+        end
+    end
+
+    # print the output
+    for (i, k) in enumerate(shapes)
+        if haskey(dat, k)
+            println(i, "\t", dat[k], "\t", k)
+        else
+            println(i, "\t", 0, "\t", k)
+        end
     end
 end
 
-# print the output
-for (i, k) in enumerate(shapes)
-    if haskey(dat, k)
-        println(i, "\t", dat[k], "\t", k)
-    else
-        println(i, "\t", 0, "\t", k)
-    end
-end
+# report(1e3, 4)
