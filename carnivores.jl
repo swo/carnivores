@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-import Base.+, Base.*, Base./
+import Base.+, Base.-, Base.*, Base./
 import StatsBase.sample
 
 # Store cubic coordinates for each hex
@@ -15,6 +15,7 @@ Hex(q, r) = Hex(q, r, -q - r)
 
 # Define basic algeraic relationship for Hex objects
 +(a::Hex, b::Hex) = Hex(a.x + b.x, a.y + b.y, a.z + b.z)
+-(a::Hex, b::Hex) = a + (-1.0 * b)
 *(a::Float64, h::Hex) = Hex(a * h.x, a * h.y, a * h.z)
 /(h::Hex, a::Float64) = (1.0 / a) * h
 
@@ -38,7 +39,7 @@ dist(a::Hex, b::Hex)::Float64 = max(abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.
 """
 Distance, but accounting for periodic boundary conditions on a grid of radius `r`
 """
-function dist(a::Hex, b::Hex, r::Int)::Float
+function dist(a::Hex, b::Hex, r::Int)::Float64
     mirror_centers = [rotate_60(Hex(2r + 1, -r, -r - 1), i) for i in 0:5]
     translated_bs = [b - c for c in mirror_centers]
     minimum([max(abs(a.x - bb.x), abs(a.y - bb.y), abs(a.z - bb.z)) for bb in translated_bs])
@@ -61,12 +62,12 @@ end
 Break an array of hexes an array of arrays. Each array is a group of continguous
 hexes.
 """
-function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
+function hex_groups(hs::Array{Hex}, radius::Int)::Array{Array{Hex}}
     gs = Array{Hex}[]
     for h in hs
         assigned = false
         for g in gs, i in g
-            if dist(h, i) == 1.0
+            if dist(h, i, radius) == 1.0
                 push!(g, h)
                 assigned = true
                 break
@@ -92,11 +93,11 @@ round_digit(x::Float64, d::Int)::Float64 = round(x * 10 ^ d) / 10 ^ d
 
 """
 Run `n_trials` simulations by placing `n_tiles` hexes randomly in a space with
-radius 2 * `max_coord` + 1.
+a given radius (i.e., you can go `radius` steps away from the center).
 """
-simulate = function(n_trials, n_tiles, max_coord)
+simulate = function(n_trials, n_tiles, radius)
     # the possible grid of hexes
-    const grid = [Hex(x, y, -x - y) for x in -max_coord:max_coord for y in max(-max_coord, -x - max_coord):min(max_coord, max_coord - x)]
+    const grid = [Hex(x, y, -x - y) for x in -radius:radius for y in max(-radius, -x - radius):min(radius, radius - x)]
 
     # store a hash (length, moi) => # of times this shape occurs
     dat = Dict{Tuple{Int, Float64}, Int}()
@@ -104,7 +105,7 @@ simulate = function(n_trials, n_tiles, max_coord)
     for i in 1:n_trials
         # drawn n_tiles hexes from the grid, put them into groups
         tiles = sample(grid, n_tiles, replace=false)
-        groups = hex_groups(tiles)
+        groups = hex_groups(tiles, radius)
 
         # characterize each group and add it to the output data
         for g in groups
@@ -148,4 +149,4 @@ function report(n_trials, radius)
     end
 end
 
-# report(1e3, 4)
+report(1e5, 4)
