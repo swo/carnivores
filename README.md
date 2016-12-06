@@ -6,6 +6,10 @@ postulated that the order had something to do with the "ease" of making each
 shape, which might have something to do with the probability that it would
 arise by chance.
 
+## Results
+
+### Simulation 1: 4 stones on a small board (radius 3)
+
 I ran some simulations using [Julia](http://julialang.org/) to check if this
 were the case. In each simulation, I would:
 
@@ -18,14 +22,14 @@ It turns out that each shape in the Circle has a unique moment of inertia,
 which made it convenient to classify each shape.
 
 The results are below. ("Circle position" counts in the reverse order of the
-arrows, so the singleton is #1 and the straight-4 is #12.) Notably, some shapes
-are out of order. It looks like the second two size-3 shapes (straight-3 and triangle)
+arrows, so the singleton is #1 and the tall staff is #12.) Notably, some shapes
+are out of order. It looks like the second two size-3 shapes (short staff and triangle)
 should be reversed, and it looks like the four of the first three size-4 shapes are out of order.
 The size-4's should go:
 
 - worm (current first size-4)
 - rhombus (currently third)
-- C (currently fourth)
+- arch (currently fourth)
 - hockey stick (currently second)
 
 | Circle position | # appearances | Size | MOI  |
@@ -43,7 +47,26 @@ The size-4's should go:
 | 11              | 2,928         | 4    | 3.0  |
 | 12              | 0             | 4    | 10.0 |
 
-Of course, it could be that the shapes are based on some combination of energy
-*and* entropy (i.e., the hexes are repulsive). For example, even though the
-size-3 triangle is more entropically favorable than the straight-3, it has more
-edges that are adjacent to other edges.
+## My names for shapes
+
+1. Singleton
+2. Doubleton
+3. Telephone
+4. Short staff
+5. Triangle
+6. Gun
+7. Worm
+8. Hockey stick
+9. Rhombus
+10. Arch
+11. Helicopter
+12. Long staff
+
+## To do
+
+- Implement periodic boundary conditions
+- Re-implement with 3 stones
+- Use more stones (10-20, but requiring that there are no 5-shapes)
+- Simulate interacting stones
+- General: how do player choice and "ease" of creation interact?
+- General: how about "sequential" constructions? e.g., what if it's easier to make one third shape than another when coming from different 2-shapes?
