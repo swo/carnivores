@@ -6,28 +6,38 @@ postulated that the order had something to do with the "ease" of making each
 shape, which might have something to do with the probability that it would
 arise by chance.
 
-I ran some simulations using [Julia](http://julialang.org/) to check if this
+## Terminology
 
-### Simulation 1: 4 stones on a small board (radius 3)
+Multiple hexes form a polyhex (or "shape"). There is one 1-hex, one 2-hex,
+three 3-hexes, and seven 4-hexes.
+
+In the (reverse) order of the Circle of Life, I call them:
+
+- singleton
+- doubleton
+- short wave
+- short bar
+- triangle
+- pistol
+- wave
+- worm
+- bee
+- arch
+- propeller
+- long wave
+
+The names of the 4-hexes follow
+[MathWorld's](http://mathworld.wolfram.com/Polyhex.html) naming scheme.
 
 ## Simulations
+
+These simulations are run with [Julia](http://julialang.org).
 
 ### Classifying shapes
 
 - Singletons and doubletons are specified just by size
 - 3-hexes all have unique moments of inertia
 - Almost all 4-hexes have unique moments of inertia. The long wave and long bar have the same moment, but their inertial matrices have different eigenvalues.
-
-The results are below. ("Circle position" counts in the reverse order of the
-arrows, so the singleton is #1 and the tall staff is #12.) Notably, some shapes
-are out of order. It looks like the second two size-3 shapes (short staff and triangle)
-should be reversed, and it looks like the four of the first three size-4 shapes are out of order.
-The size-4's should go:
-
-- worm (current first size-4)
-- rhombus (currently third)
-- arch (currently fourth)
-- hockey stick (currently second)
 
 ## To do
 

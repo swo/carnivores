@@ -1,10 +1,14 @@
-Laying down 4 hexes on a radius 4 board. Repeat 10 million times.
-Radius 4 means you can go 3 hexes away from the center.
+# Simulation 1: 4 tiles on a small board
 
-- Set out a hexagonal grid of "radius" 3 (i.e., from the center tile, you can go three tiles in any of the 6 directions)
+## Methods
+
+- Set out a hexagonal grid of "radius" 4 (i.e., from the center tile, you can go 3 tiles in any of the 6 directions)
 - Pick four of those tiles at random (without replacement)
 - Separate the tiles into contiguous groups
 - Evaluate the size and moment of inertia of each group
+- Repeat 10 million times
+
+## Results
 
 | Shape      | Counts   |
 |------------|----------|
@@ -21,3 +25,10 @@ Radius 4 means you can go 3 hexes away from the center.
 | propeller  | 699      |
 | long bar   | 672      |
 
+## Conclusions
+
+The order of the polyhexes in the Circle of Life mostly matches the order of
+their relative frequencies with two exceptions:
+
+- In the Circle, the second two 3-hexes are the short bar and triangle. In the simulation, the two are reversed.
+- In the Circle, the long wave is third 4-hex. In the simulation, it is the fifth.
