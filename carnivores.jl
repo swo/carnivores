@@ -19,12 +19,22 @@ Hex(q, r) = Hex(q, r, -q - r)
 *(a::Float64, h::Hex) = Hex(a * h.x, a * h.y, a * h.z)
 /(h::Hex, a::Float64) = (1.0 / a) * h
 
+"""
+Classify a polyhex (of size 1 to 4). The names used are:
+ - For size 1, singleton
+ - For size 2, doubleton
+ - For size 3, triangle, short wave, and short bar
+ - For size 4, as per MathWorld (http://mathworld.wolfram.com/Polyhex.html) but with
+    "long" prefixed to worm and wave
+"""
 function classify_polyhex(hs::Array{Hex})::String
+    # some can be classified just by the size of the polyhex
     if length(hs) == 1
         return "singleton"
     elseif length(hs) == 2
         return "doubleton"
     else
+        # larger ones can be distinguished by moment of inertia
         m = round_digit(moi(hs), 1)
         if length(hs) == 3
             if m == 2.1
@@ -46,7 +56,8 @@ function classify_polyhex(hs::Array{Hex})::String
             elseif m == 3.0
                 return "propeller"
             elseif m == 5.0
-                # the worm and long bar have the same MOI
+                # the long worm and long bar are a special case because they
+                # have the same MOI. look for an inertial eigenvalue.
                 ev = first_inertial_eigval(hs)
                 if ev == 0.0
                     return "long bar"
@@ -60,23 +71,26 @@ function classify_polyhex(hs::Array{Hex})::String
 end
 
 """
-Distance between two hexes `a` and `b`
+Distance between two hexes
 """
 dist(a::Hex, b::Hex)::Float64 = max(abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z))
 
 """
-Center of mass of an list of hexes
+Center of mass of an array of hexes
 """
 com(hs::Array{Hex})::Hex = sum(hs) / convert(Float64, length(hs))
 
 """
-Moment of intertia for a list of hexes
+Moment of intertia of an array of hexes
 """
 function moi(hs::Array{Hex})::Float64
     c = com(hs)
     sum([dist(c, h) ^ 2 for h in hs])
 end
 
+"""
+3D inertial matrix of an array of hexes
+"""
 function inertial_matrix(hs::Array{Hex})::Array{Float64}
     hs = [h - com(hs) for h in hs]
     x = sum([h.x ^ 2 for h in hs])
@@ -91,6 +105,9 @@ function inertial_matrix(hs::Array{Hex})::Array{Float64}
     [i11 i12 i13; i12 i22 i23; i13 i23 i33]
 end
 
+"""
+First (smallest) eigenvalue of the intertial matrix of an array of hexes
+"""
 function first_inertial_eigval(hs::Array{Hex})::Float64
     round_digit(eigvals(inertial_matrix(hs))[1], 2)
 end
@@ -119,11 +136,6 @@ function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
 end
 
 """
-Compute the "character" (length and MOI) of a group of hexes.
-"""
-group_char(x::Array{Hex})::Tuple{Int,Float64,Float64} = (length(x), round_digit(moi(x), 2), first_inertial_eigval(x))
-
-"""
 Round `x` down to `d` decimal places
 """
 round_digit(x::Float64, d::Int)::Float64 = round(x * 10 ^ d) / 10 ^ d
@@ -136,8 +148,8 @@ simulate = function(n_trials, n_tiles, radius)
     # the possible grid of hexes
     const grid = [Hex(x, y, -x - y) for x in -radius:radius for y in max(-radius, -x - radius):min(radius, radius - x)]
 
-    # store a hash (length, moi) => # of times this shape occurs
-    dat = Dict{Tuple{Int, Float64}, Int}()
+    # store a hash {polyhex name => # of times this shape occurs}
+    dat = Dict{String, Int}()
 
     for i in 1:n_trials
         # drawn n_tiles hexes from the grid, put them into groups
@@ -146,7 +158,7 @@ simulate = function(n_trials, n_tiles, radius)
 
         # characterize each group and add it to the output data
         for g in groups
-            c = group_char(g)
+            c = classify_polyhex(g)
             if haskey(dat, c)
                 dat[c] += 1
             else
@@ -183,31 +195,13 @@ function report(n_trials, radius)
     # generate the data
     dat = simulate(n_trials, 4, radius)
 
-    # the list of shapes in the circle of life
-    const shapes = [(1, 0.0),
-                    (2, 0.5),
-                    (3, 2.1), (3, 2.0), (3, 1.3),
-                    (4, 3.2), (4, 5.0), (4, 5.3), (4, 2.5), (4, 4.2), (4, 3.0), (4, 10.0)]
-
-
-    # check that all the shapes in the simulation data are present in the circle of life
-    for k in keys(dat)
-        if !(k in shapes)
-            throw("missing $(k)")
-        end
-    end
-
-    # print the output
-    for (i, k) in enumerate(shapes)
-        if haskey(dat, k)
-            println(i, "\t", dat[k], "\t", k)
-        else
-            println(i, "\t", 0, "\t", k)
-        end
+    for name in sort(collect(keys(dat)), by=x -> dat[x], rev=true)
+        counts = dat[name]
+        println(name, "\t", counts, "\t")
     end
 end
 
-#report(1e5, 4)
+report(1e7, 4)
 #= hs = [Hex(0, 0, 0), Hex(1, -1, 0), Hex(2, -2, 0), Hex(3, -3, 0)] =#
 #= c = com(hs) =#
 #= xs = [h - c for h in hs] =#
@@ -219,7 +213,7 @@ end
 #= println("ts ", ts) =#
 #= println("s ", sum(ts)) =#
 #= println(moi([Hex(0, 0, 0), Hex(1, -1, 0), Hex(2, -2, 0), Hex(3, -3, 0)])) =#
-println(characterize_shapes())
+#println(characterize_shapes())
 #x = characterize_shapes()
 #println(length(x))
 #println(length(Set(x)))
