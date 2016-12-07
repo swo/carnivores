@@ -195,6 +195,9 @@ function circle_of_life()
     [classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
 end
 
+"""
+Run a simulation and report the results.
+"""
 function report(n_trials, radius)
     # generate the data
     dat = simulate(n_trials, 4, radius)
@@ -206,18 +209,3 @@ function report(n_trials, radius)
 end
 
 report(1e7, 4)
-#= hs = [Hex(0, 0, 0), Hex(1, -1, 0), Hex(2, -2, 0), Hex(3, -3, 0)] =#
-#= c = com(hs) =#
-#= xs = [h - c for h in hs] =#
-#= ds = [dist(h, c) for h in hs] =#
-#= ts = [d ^ 2 for d in ds] =#
-#= println("com ", c) =#
-#= println("xs ", xs) =#
-#= println("ds ", ds) =#
-#= println("ts ", ts) =#
-#= println("s ", sum(ts)) =#
-#= println(moi([Hex(0, 0, 0), Hex(1, -1, 0), Hex(2, -2, 0), Hex(3, -3, 0)])) =#
-#println(characterize_shapes())
-#x = characterize_shapes()
-#println(length(x))
-#println(length(Set(x)))
