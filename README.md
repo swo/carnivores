@@ -33,15 +33,20 @@ The names of the 4-hexes follow
 
 These simulations are run with [Julia](http://julialang.org).
 
+### Working with hexes
+
+I've relied heavily on this [outstanding post](http://www.redblobgames.com/grids/hexagons) by Amit Patel.
+
 ### Classifying shapes
 
-- Singletons and doubletons are specified just by size
-- 3-hexes all have unique moments of inertia
-- Almost all 4-hexes have unique moments of inertia. The long wave and long bar have the same moment, but their inertial matrices have different eigenvalues.
+- Singletons and doubletons are specified just by size.
+- 3-hexes all have unique [moments of inertia](https://en.wikipedia.org/wiki/Moment_of_inertia) (about their center of mass perpendicular to the plane of the board).
+- Almost all 4-hexes have unique moments of inertia. The long wave and long bar have the same moment, but their [inertial tensors](https://en.wikipedia.org/wiki/Moment_of_inertia#The_inertia_tensor) have different eigenvalues.
 
 ## To do
 
-- Implement periodic boundary conditions
+- Migrate to a module and separate code
+- Implement periodic boundary conditions?
 - Re-implement with 3 stones
 - Use more stones (10-20, but requiring that there are no 5-shapes)
 - Simulate interacting stones

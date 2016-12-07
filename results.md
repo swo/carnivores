@@ -25,6 +25,11 @@
 | propeller  | 699      |
 | long bar   | 672      |
 
+The difference between the last two is within the margin of error. (For a
+multinomial distribution, the variance for the counts in a category is similar
+to the number of counts in that category if the category is rare. Thus, the
+standard deviation for the long bar is around 25.)
+
 ## Conclusions
 
 The order of the polyhexes in the Circle of Life mostly matches the order of

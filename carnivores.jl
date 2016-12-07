@@ -58,10 +58,10 @@ function classify_polyhex(hs::Array{Hex})::String
             elseif m == 5.0
                 # the long worm and long bar are a special case because they
                 # have the same MOI. look for an inertial eigenvalue.
-                ev = first_inertial_eigval(hs)
-                if ev == 0.0
+                pm = first_pmoi(hs)
+                if pm == 0.0
                     return "long bar"
-                elseif ev == 0.39
+                elseif pm == 0.39
                     return "long wave"
                 end
             end
@@ -89,9 +89,9 @@ function moi(hs::Array{Hex})::Float64
 end
 
 """
-3D inertial matrix of an array of hexes
+Inertial tensor of an array of hexes
 """
-function inertial_matrix(hs::Array{Hex})::Array{Float64}
+function inertial_tensor(hs::Array{Hex})::Array{Float64}
     hs = [h - com(hs) for h in hs]
     x = sum([h.x ^ 2 for h in hs])
     y = sum([h.y ^ 2 for h in hs])
@@ -106,10 +106,11 @@ function inertial_matrix(hs::Array{Hex})::Array{Float64}
 end
 
 """
-First (smallest) eigenvalue of the intertial matrix of an array of hexes
+Smallest principal moment of inertia (eigenvalue of the intertial tensor) of an
+array of hexes (rounded to two decimal places).
 """
-function first_inertial_eigval(hs::Array{Hex})::Float64
-    round_digit(eigvals(inertial_matrix(hs))[1], 2)
+function first_pmoi(hs::Array{Hex})::Float64
+    round_digit(eigvals(inertial_tensor(hs))[1], 2)
 end
 
 """
@@ -170,7 +171,11 @@ simulate = function(n_trials, n_tiles, radius)
     return dat
 end
 
-function characterize_shapes()
+"""
+Return the names of the polyhexes in the Circle of Life. Use this as a verification
+of the names and classifications.
+"""
+function circle_of_life()
     shapes1 = [[Hex(0, 0, 0)]]
 
     shapes2 = [[Hex(0, 0, 0), Hex(1, 0, -1)]]
@@ -187,7 +192,6 @@ function characterize_shapes()
                [Hex(0, 0, 0), Hex(1, 0, -1), Hex(-1, 1, 0), Hex(0, -1, 1)],
                [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, 0, -3)]]
 
-    #[group_char(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
     [classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
 end
 
