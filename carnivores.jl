@@ -19,31 +19,50 @@ Hex(q, r) = Hex(q, r, -q - r)
 *(a::Float64, h::Hex) = Hex(a * h.x, a * h.y, a * h.z)
 /(h::Hex, a::Float64) = (1.0 / a) * h
 
-"""
-Rotate a hex clockwise by 60 degrees (about the origin)
-"""
-rotate_60(h::Hex) = Hex(-h.z, -h.x, -h.y)
-function rotate_60(h::Hex, times::Int)
-    o = h
-    for i in 1:times
-        o = rotate_60(o)
+function classify_polyhex(hs::Array{Hex})::String
+    if length(hs) == 1
+        return "singleton"
+    elseif length(hs) == 2
+        return "doubleton"
+    else
+        m = round_digit(moi(hs), 1)
+        if length(hs) == 3
+            if m == 2.1
+                return "short wave"
+            elseif m == 2.0
+                return "short bar"
+            elseif m == 1.3
+                return "triangle"
+            end
+        elseif length(hs) == 4
+            if m == 3.2
+                return "pistol"
+            elseif m == 5.3
+                return "worm"
+            elseif m == 2.5
+                return "bee"
+            elseif m == 4.2
+                return "arch"
+            elseif m == 3.0
+                return "propeller"
+            elseif m == 5.0
+                # the worm and long bar have the same MOI
+                ev = first_inertial_eigval(hs)
+                if ev == 0.0
+                    return "long bar"
+                elseif ev == 0.39
+                    return "long wave"
+                end
+            end
+        end
     end
-    o
+    error("unrecognized shape of size $(length(hs)) with MOI $(moi(hs)) and FIE $(first_inertial_eigenvalue(hs))")
 end
 
 """
 Distance between two hexes `a` and `b`
 """
 dist(a::Hex, b::Hex)::Float64 = max(abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z))
-
-"""
-Distance, but accounting for periodic boundary conditions on a grid of radius `r`
-"""
-function dist(a::Hex, b::Hex, r::Int)::Float64
-    mirror_centers = [rotate_60(Hex(2r + 1, -r, -r - 1), i) for i in 0:5]
-    translated_bs = [b - c for c in mirror_centers]
-    minimum([max(abs(a.x - bb.x), abs(a.y - bb.y), abs(a.z - bb.z)) for bb in translated_bs])
-end
 
 """
 Center of mass of an list of hexes
@@ -58,16 +77,34 @@ function moi(hs::Array{Hex})::Float64
     sum([dist(c, h) ^ 2 for h in hs])
 end
 
+function inertial_matrix(hs::Array{Hex})::Array{Float64}
+    hs = [h - com(hs) for h in hs]
+    x = sum([h.x ^ 2 for h in hs])
+    y = sum([h.y ^ 2 for h in hs])
+    z = sum([h.z ^ 2 for h in hs])
+    i11 = y + z
+    i22 = x + z
+    i33 = x + y
+    i12 = sum([-h.x * h.y for h in hs])
+    i13 = sum([-h.x * h.z for h in hs])
+    i23 = sum([-h.y * h.z for h in hs])
+    [i11 i12 i13; i12 i22 i23; i13 i23 i33]
+end
+
+function first_inertial_eigval(hs::Array{Hex})::Float64
+    round_digit(eigvals(inertial_matrix(hs))[1], 2)
+end
+
 """
 Break an array of hexes an array of arrays. Each array is a group of continguous
 hexes.
 """
-function hex_groups(hs::Array{Hex}, radius::Int)::Array{Array{Hex}}
+function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
     gs = Array{Hex}[]
     for h in hs
         assigned = false
         for g in gs, i in g
-            if dist(h, i, radius) == 1.0
+            if dist(h, i) == 1.0
                 push!(g, h)
                 assigned = true
                 break
@@ -84,7 +121,7 @@ end
 """
 Compute the "character" (length and MOI) of a group of hexes.
 """
-group_char(x::Array{Hex})::Tuple{Int,Float64} = (length(x), round_digit(moi(x), 1))
+group_char(x::Array{Hex})::Tuple{Int,Float64,Float64} = (length(x), round_digit(moi(x), 2), first_inertial_eigval(x))
 
 """
 Round `x` down to `d` decimal places
@@ -105,7 +142,7 @@ simulate = function(n_trials, n_tiles, radius)
     for i in 1:n_trials
         # drawn n_tiles hexes from the grid, put them into groups
         tiles = sample(grid, n_tiles, replace=false)
-        groups = hex_groups(tiles, radius)
+        groups = hex_groups(tiles)
 
         # characterize each group and add it to the output data
         for g in groups
@@ -119,6 +156,27 @@ simulate = function(n_trials, n_tiles, radius)
     end
 
     return dat
+end
+
+function characterize_shapes()
+    shapes1 = [[Hex(0, 0, 0)]]
+
+    shapes2 = [[Hex(0, 0, 0), Hex(1, 0, -1)]]
+
+    shapes3 = [[Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, -1, -1)],
+               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2)],
+               [Hex(0, 0, 0), Hex(-1, 0, 1), Hex(0, -1, 1)]]
+
+    shapes4 = [[Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(1, 1, -2)],
+               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, -1, -1), Hex(3, -1, -2)],
+               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, -1, -2)],
+               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(1, -1, 0), Hex(2, -1, -1)],
+               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(1, 1, -2), Hex(0, 2, -2)],
+               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(-1, 1, 0), Hex(0, -1, 1)],
+               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, 0, -3)]]
+
+    #[group_char(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
+    [classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
 end
 
 function report(n_trials, radius)
@@ -149,4 +207,19 @@ function report(n_trials, radius)
     end
 end
 
-report(1e5, 4)
+#report(1e5, 4)
+#= hs = [Hex(0, 0, 0), Hex(1, -1, 0), Hex(2, -2, 0), Hex(3, -3, 0)] =#
+#= c = com(hs) =#
+#= xs = [h - c for h in hs] =#
+#= ds = [dist(h, c) for h in hs] =#
+#= ts = [d ^ 2 for d in ds] =#
+#= println("com ", c) =#
+#= println("xs ", xs) =#
+#= println("ds ", ds) =#
+#= println("ts ", ts) =#
+#= println("s ", sum(ts)) =#
+#= println(moi([Hex(0, 0, 0), Hex(1, -1, 0), Hex(2, -2, 0), Hex(3, -3, 0)])) =#
+println(characterize_shapes())
+#x = characterize_shapes()
+#println(length(x))
+#println(length(Set(x)))
