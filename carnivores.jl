@@ -58,10 +58,10 @@ function classify_polyhex(hs::Array{Hex})::String
             elseif m == 5.0
                 # the long worm and long bar are a special case because they
                 # have the same MOI. look for an inertial eigenvalue.
-                pm = first_pmoi(hs)
+                pm = round_digit(first_pmoi(hs), 1)
                 if pm == 0.0
                     return "long bar"
-                elseif pm == 0.39
+                elseif pm == 0.4
                     return "long wave"
                 end
             end
@@ -110,7 +110,7 @@ Smallest principal moment of inertia (eigenvalue of the intertial tensor) of an
 array of hexes (rounded to two decimal places).
 """
 function first_pmoi(hs::Array{Hex})::Float64
-    round_digit(eigvals(inertial_tensor(hs))[1], 2)
+    eigvals(inertial_tensor(hs))[1]
 end
 
 """
