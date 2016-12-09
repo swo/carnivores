@@ -85,22 +85,25 @@ Break an array of hexes an array of arrays. Each array is a group of continguous
 hexes.
 """
 function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
-    gs = Array{Hex}[]
+    groups = Array{Hex}[]
     for h in hs
-        assigned = false
-        for g in gs, i in g
-            if dist(h, i) == 1
-                push!(g, h)
-                assigned = true
-                break
+        add_hex_to_groups!(groups, h)
+    end
+    groups
+end
+
+function add_hex_to_groups!(groups, hex)
+    for group in groups
+        for member in group
+            if dist(hex, member) == 1
+                push!(group, hex)
+                return nothing
             end
         end
-
-        if !assigned
-            push!(gs, [h])
-        end
     end
-    gs
+
+    push!(groups, [hex])
+    nothing
 end
 
 """
