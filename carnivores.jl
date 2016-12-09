@@ -1,23 +1,26 @@
 #!/usr/bin/env julia
 
-import Base.+, Base.-, Base.*, Base./
+import Base.+, Base.-, Base.*#, Base.convert
 import StatsBase.sample
 
 # Store cubic coordinates for each hex
 immutable Hex
-    x::Float64
-    y::Float64
-    z::Float64
+    x::Int
+    y::Int
 end
 
-# Allow an axial construction (that just converts back to cubic coordinates)
-Hex(q, r) = Hex(q, r, -q - r)
+# Allow a cubic construction
+Hex(x, y, z) = if (x + y + z == 0) Hex(x, y) else error("cubic coordinates do not sum to 0") end
 
 # Define basic algeraic relationship for Hex objects
-+(a::Hex, b::Hex) = Hex(a.x + b.x, a.y + b.y, a.z + b.z)
--(a::Hex, b::Hex) = a + (-1.0 * b)
-*(a::Float64, h::Hex) = Hex(a * h.x, a * h.y, a * h.z)
-/(h::Hex, a::Float64) = (1.0 / a) * h
++(a::Hex, b::Hex) = Hex(a.x + b.x, a.y + b.y)
+#+(a::Hex, b::Hex) = Hex(a.x + b.x, a.y + b.y, a.z + b.z)
+*(a::Int, h::Hex) = Hex(a * h.x, a * h.y)
+-(a::Hex, b::Hex) = Hex(a.x - b.x, a.y - b.y)
+#*(a::Float64, h::Hex{Int}) = Hex{Float64}(a * h.x, a * h.y, a * h.z)
+#/(h::Hex, a::Float64) = (1.0 / a) * h
+
+hex2cartesian(h::Hex)::Array{Float64} = [h.x + 0.5 * h.y, sqrt(3)/2 * h.y]
 
 """
 Classify a polyhex (of size 1 to 4). The names used are:
@@ -35,83 +38,59 @@ function classify_polyhex(hs::Array{Hex})::String
         return "doubleton"
     else
         # larger ones can be distinguished by moment of inertia
-        m = round_digit(moi(hs), 1)
+        m = round(moi(hs), 2)
         if length(hs) == 3
-            if m == 2.1
+            if m == 1.67
                 return "short wave"
             elseif m == 2.0
                 return "short bar"
-            elseif m == 1.3
+            elseif m == 1.0
                 return "triangle"
             end
         elseif length(hs) == 4
-            if m == 3.2
+            if m == 2.75
                 return "pistol"
-            elseif m == 5.3
+            elseif m == 4.0
+                return "long wave"
+            elseif m == 4.25
                 return "worm"
-            elseif m == 2.5
+            elseif m == 2.0
                 return "bee"
-            elseif m == 4.2
+            elseif m == 3.25
                 return "arch"
             elseif m == 3.0
                 return "propeller"
             elseif m == 5.0
-                # the long worm and long bar are a special case because they
-                # have the same MOI. look for an inertial eigenvalue.
-                pm = round_digit(first_pmoi(hs), 1)
-                if pm == 0.0
-                    return "long bar"
-                elseif pm == 0.4
-                    return "long wave"
-                end
+                return "long bar"
             end
         end
     end
-    error("unrecognized shape of size $(length(hs)) with MOI $(moi(hs)) and FIE $(first_inertial_eigenvalue(hs))")
+    error("unrecognized shape of size $(length(hs)) with MOI $(moi(hs)), rounded to $(round(moi(hs), 2))")
 end
 
 """
 Distance between two hexes
 """
-dist(a::Hex, b::Hex)::Float64 = max(abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z))
+#dist(a::Hex, b::Hex)::Int = max(abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z))
+dist(a::Hex, b::Hex)::Int = (abs(a.x - b.x) + abs(a.x + a.y - b.x - b.y) + abs(a.y - b.y)) / 2
+#dist(a::Cartesian, b::Cartesian)::Float64 = norm(a - b)
 
 """
 Center of mass of an array of hexes
 """
-com(hs::Array{Hex})::Hex = sum(hs) / convert(Float64, length(hs))
+#com(hs::Array{Hex})::Hex = sum(hs) / convert(Float64, length(hs))
+com(hs::Array{Hex})::Array{Float64} = hex2cartesian(sum(hs)) / convert(Float64, length(hs))
 
 """
 Moment of intertia of an array of hexes
 """
+moi(hs::Array{Hex})::Float64 = sum([norm(com(hs) - hex2cartesian(h)) ^ 2 for h in hs])
+#=
 function moi(hs::Array{Hex})::Float64
     c = com(hs)
     sum([dist(c, h) ^ 2 for h in hs])
 end
-
-"""
-Inertial tensor of an array of hexes
-"""
-function inertial_tensor(hs::Array{Hex})::Array{Float64}
-    hs = [h - com(hs) for h in hs]
-    x = sum([h.x ^ 2 for h in hs])
-    y = sum([h.y ^ 2 for h in hs])
-    z = sum([h.z ^ 2 for h in hs])
-    i11 = y + z
-    i22 = x + z
-    i33 = x + y
-    i12 = sum([-h.x * h.y for h in hs])
-    i13 = sum([-h.x * h.z for h in hs])
-    i23 = sum([-h.y * h.z for h in hs])
-    [i11 i12 i13; i12 i22 i23; i13 i23 i33]
-end
-
-"""
-Smallest principal moment of inertia (eigenvalue of the intertial tensor) of an
-array of hexes (rounded to two decimal places).
-"""
-function first_pmoi(hs::Array{Hex})::Float64
-    eigvals(inertial_tensor(hs))[1]
-end
+=#
 
 """
 Break an array of hexes an array of arrays. Each array is a group of continguous
@@ -122,7 +101,7 @@ function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
     for h in hs
         assigned = false
         for g in gs, i in g
-            if dist(h, i) == 1.0
+            if dist(h, i) == 1
                 push!(g, h)
                 assigned = true
                 break
@@ -192,7 +171,14 @@ function circle_of_life()
                [Hex(0, 0, 0), Hex(1, 0, -1), Hex(-1, 1, 0), Hex(0, -1, 1)],
                [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, 0, -3)]]
 
-    [classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
+    for shape in vcat(shapes1, shapes2, shapes3, shapes4)
+        println(shape)
+        println(length(shape))
+        println(moi(shape))
+        println()
+    end
+
+    #[classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
 end
 
 """
@@ -208,6 +194,7 @@ function report(n_trials, n_tiles, radius)
     end
 end
 
+#=
 println("radius\tshort wave:triangle\ttriangle:short bar")
 for radius in 1:20
     dat = simulate(1e6, 3, radius)
@@ -215,3 +202,6 @@ for radius in 1:20
     ratio2 = dat["triangle"] / dat["short bar"]
     println(radius, "\t", ratio1, "\t", ratio2)
 end
+=#
+@time report(1e7, 4, 4)
+#circle_of_life()
