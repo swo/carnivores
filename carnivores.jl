@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 import Base.+, Base.-, Base.*#, Base.convert
-import StatsBase.sample
+import StatsBase.sample, StatsBase.sample!
 
 # Store cubic coordinates for each hex
 immutable Hex
@@ -104,45 +104,59 @@ function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
 end
 
 """
-Round `x` down to `d` decimal places
-"""
-round_digit(x::Float64, d::Int)::Float64 = round(x * 10 ^ d) / 10 ^ d
-
-"""
 Run `n_trials` simulations by placing `n_tiles` hexes randomly in a space with
 a given radius (i.e., you can go `radius` steps away from the center).
 """
-simulate = function(n_trials, n_tiles, radius)
+function simulate(n_trials::Int, n_tiles::Int, radius::Int)
     # the possible grid of hexes
-    const grid = [Hex(x, y, -x - y) for x in -radius:radius for y in max(-radius, -x - radius):min(radius, radius - x)]
+    grid = [Hex(x, y, -x - y) for x in -radius:radius for y in max(-radius, -x - radius):min(radius, radius - x)]
 
     # store a hash {polyhex name => # of times this shape occurs}
     dat = Dict{String, Int}()
 
+    # pre-allocate the keys of the dictionary to avoid inferences
+    for k in circle_of_life()
+        dat[k] = 0
+    end
+
+    simulate_trials!(dat, grid, n_tiles, n_trials)
+
+    return dat
+end
+
+"""
+Actually do the sampling and classification
+"""
+function simulate_trials!(dat, grid, n_tiles, n_trials::Int)
+    # pre-allocated space for the drawn tiles
+    tiles = Array{Hex}(n_tiles)
+    groups = Array{Int}(n_tiles)
+
     for i in 1:n_trials
-        # drawn n_tiles hexes from the grid, put them into groups
-        tiles = sample(grid, n_tiles, replace=false)
+        # drawn tiles from the grid; put them into groups
+        sample!(grid, tiles, replace=false)
         groups = hex_groups(tiles)
+        #hex_groups!(groups, tiles)
+
+        #=
+        for g in unique(groups)
+            c = classify_polyhex(tiles[find(x -> x == g, groups)])
+            dat[c] += 1
+        end
+        =#
 
         # characterize each group and add it to the output data
         for g in groups
-            c = classify_polyhex(g)
-            if haskey(dat, c)
-                dat[c] += 1
-            else
-                dat[c] = 1
-            end
+            dat[classify_polyhex(g)] += 1
         end
     end
-
-    return dat
 end
 
 """
 Return the names of the polyhexes in the Circle of Life. Use this as a verification
 of the names and classifications.
 """
-function circle_of_life()
+function circle_of_life()::Array{String}
     shapes1 = [[Hex(0, 0, 0)]]
 
     shapes2 = [[Hex(0, 0, 0), Hex(1, 0, -1)]]
@@ -184,5 +198,6 @@ for radius in 1:20
     println(radius, "\t", ratio1, "\t", ratio2)
 end
 =#
-@time report(1e6, 4, 4)
+@time report(1000000, 4, 4)
+#Profile.print(format=:flat, sortedby=:count)
 #circle_of_life()
