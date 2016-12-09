@@ -192,15 +192,8 @@ function report(n_trials, n_tiles, radius)
     end
 end
 
-#=
-println("radius\tshort wave:triangle\ttriangle:short bar")
+println("radius\tshort wave\ttriangle\tshort bar")
 for radius in 1:20
-    dat = simulate(1e6, 3, radius)
-    ratio1 = dat["short wave"] / dat["triangle"]
-    ratio2 = dat["triangle"] / dat["short bar"]
-    println(radius, "\t", ratio1, "\t", ratio2)
+    dat = simulate(1000000, 3, radius)
+    println(radius, "\t", dat["short wave"], "\t", dat["triangle"], "\t", dat["short bar"])
 end
-=#
-@time report(1000000, 4, 4)
-#Profile.print(format=:flat, sortedby=:count)
-#circle_of_life()
