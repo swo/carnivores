@@ -14,11 +14,8 @@ Hex(x, y, z) = if (x + y + z == 0) Hex(x, y) else error("cubic coordinates do no
 
 # Define basic algeraic relationship for Hex objects
 +(a::Hex, b::Hex) = Hex(a.x + b.x, a.y + b.y)
-#+(a::Hex, b::Hex) = Hex(a.x + b.x, a.y + b.y, a.z + b.z)
 *(a::Int, h::Hex) = Hex(a * h.x, a * h.y)
 -(a::Hex, b::Hex) = Hex(a.x - b.x, a.y - b.y)
-#*(a::Float64, h::Hex{Int}) = Hex{Float64}(a * h.x, a * h.y, a * h.z)
-#/(h::Hex, a::Float64) = (1.0 / a) * h
 
 hex2cartesian(h::Hex)::Array{Float64} = [h.x + 0.5 * h.y, sqrt(3)/2 * h.y]
 
@@ -71,26 +68,17 @@ end
 """
 Distance between two hexes
 """
-#dist(a::Hex, b::Hex)::Int = max(abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z))
 dist(a::Hex, b::Hex)::Int = (abs(a.x - b.x) + abs(a.x + a.y - b.x - b.y) + abs(a.y - b.y)) / 2
-#dist(a::Cartesian, b::Cartesian)::Float64 = norm(a - b)
 
 """
 Center of mass of an array of hexes
 """
-#com(hs::Array{Hex})::Hex = sum(hs) / convert(Float64, length(hs))
 com(hs::Array{Hex})::Array{Float64} = hex2cartesian(sum(hs)) / convert(Float64, length(hs))
 
 """
 Moment of intertia of an array of hexes
 """
 moi(hs::Array{Hex})::Float64 = sum([norm(com(hs) - hex2cartesian(h)) ^ 2 for h in hs])
-#=
-function moi(hs::Array{Hex})::Float64
-    c = com(hs)
-    sum([dist(c, h) ^ 2 for h in hs])
-end
-=#
 
 """
 Break an array of hexes an array of arrays. Each array is a group of continguous
@@ -171,14 +159,7 @@ function circle_of_life()
                [Hex(0, 0, 0), Hex(1, 0, -1), Hex(-1, 1, 0), Hex(0, -1, 1)],
                [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, 0, -3)]]
 
-    for shape in vcat(shapes1, shapes2, shapes3, shapes4)
-        println(shape)
-        println(length(shape))
-        println(moi(shape))
-        println()
-    end
-
-    #[classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
+    [classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
 end
 
 """
@@ -203,5 +184,5 @@ for radius in 1:20
     println(radius, "\t", ratio1, "\t", ratio2)
 end
 =#
-@time report(1e7, 4, 4)
+@time report(1e6, 4, 4)
 #circle_of_life()
