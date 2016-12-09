@@ -37,3 +37,29 @@ their relative frequencies with two exceptions:
 
 - In the Circle, the second two 3-hexes are the short bar and triangle. In the simulation, the two are reversed.
 - In the Circle, the long wave is third 4-hex. In the simulation, it is the fifth.
+
+# Simulation 2: 3 tiles on a small board
+
+## Methods
+
+The setup is as above, but with 3 tiles rather than 4.
+
+## Results
+
+| Shape      | Counts   |
+|------------|----------|
+| singleton  | 22473282 |
+| doubleton  | 3385782  |
+| short wave | 123461   |
+| triangle   | 69374    |
+| short bar  | 58883    |
+
+## Conclusions
+
+The order of the 3-hexes is the same as predicted by the previous simulation.
+
+# Simulation 3: 3 tiles on a varying board
+
+## Methods
+
+The setup is as above, but I varied the board radius from 1 up to 9.

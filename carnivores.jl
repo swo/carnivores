@@ -198,9 +198,9 @@ end
 """
 Run a simulation and report the results.
 """
-function report(n_trials, radius)
+function report(n_trials, n_tiles, radius)
     # generate the data
-    dat = simulate(n_trials, 4, radius)
+    dat = simulate(n_trials, n_tiles, radius)
 
     for name in sort(collect(keys(dat)), by=x -> dat[x], rev=true)
         counts = dat[name]
@@ -208,4 +208,10 @@ function report(n_trials, radius)
     end
 end
 
-report(1e7, 4)
+println("radius\tshort wave:triangle\ttriangle:short bar")
+for radius in 1:20
+    dat = simulate(1e6, 3, radius)
+    ratio1 = dat["short wave"] / dat["triangle"]
+    ratio2 = dat["triangle"] / dat["short bar"]
+    println(radius, "\t", ratio1, "\t", ratio2)
+end
