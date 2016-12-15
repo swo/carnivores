@@ -93,16 +93,31 @@ function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
 end
 
 function add_hex_to_groups!(groups, hex)
-    for group in groups
+    newgroup = [hex]
+    null = [] #value to mark redundant groups
+    for i = 1:length(groups)
+        group = groups[i]
+        touches = false
+
         for member in group
             if dist(hex, member) == 1
-                push!(group, hex)
-                return nothing
+                #do NOT return here, it may touch more than one group
+                touches = true;
             end
         end
+        if touches
+            #merge group to hex, so that multiple groups can be merged 
+            for member in group
+                push!(newgroup, member)
+            end
+            #mark redundant group
+            groups[i] = null 
+        end
     end
+    #remove redundant groups
+    deleteat!(groups, findin(groups, [null])) 
 
-    push!(groups, [hex])
+    push!(groups, newgroup)
     nothing
 end
 
