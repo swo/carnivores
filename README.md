@@ -1,10 +1,7 @@
 # Carnivores simulation
 
-A friend and I were curious about the order of the shapes in the "Circle of
-Life" in the game [Carnivore](https://boardgamegeek.com/boardgame/184730/carnivores).  We
-postulated that the order had something to do with the "ease" of making each
-shape, which might have something to do with the probability that it would
-arise by chance.
+The order of the shapes in the "Circle of Life" in the game
+[Carnivores](https://boardgamegeek.com/boardgame/184730/carnivores)
 
 ## Terminology
 
@@ -40,14 +37,12 @@ I've relied heavily on this [outstanding post](http://www.redblobgames.com/grids
 ### Classifying shapes
 
 - Singletons and doubletons are specified just by size.
-- 3-hexes all have unique [moments of inertia](https://en.wikipedia.org/wiki/Moment_of_inertia) (about their center of mass perpendicular to the plane of the board).
-- Almost all 4-hexes have unique moments of inertia. The long wave and long bar have the same moment, but their [inertial tensors](https://en.wikipedia.org/wiki/Moment_of_inertia#The_inertia_tensor) have different eigenvalues.
+- 3- and 4-hexes all have unique [moments of inertia](https://en.wikipedia.org/wiki/Moment_of_inertia) (about their center of mass perpendicular to the plane of the board).
 
 ## To do
 
 - Migrate to a module and separate code
 - Implement periodic boundary conditions?
-- Re-implement with 3 stones
 - Use more stones (10-20, but requiring that there are no 5-shapes)
 - Simulate interacting stones
 - General: how do player choice and "ease" of creation interact?
