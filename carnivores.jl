@@ -34,7 +34,7 @@ Classify a polyhex (of size 1 to 4). The names used are:
 `idx` is the indices of the selected tiles among an array
 `grid` of hexes.
 """
-function classify_polyhex(idx, grid)::String
+function classifypolyhex(idx, grid)::String
     # some can be classified just by the size of the polyhex
     if length(idx) == 1
         return "singleton"
@@ -75,7 +75,7 @@ end
 """
 Classify a collection of hexes `hs`.
 """
-function classify_polyhex(hs)
+function classifypolyhex(hs)
     # This is janky: I find the minimum grid needed to fit all of these, find
     # the indices of the hexes in that grid, and then pass those indices and
     # grid to the other dispatch.
@@ -83,7 +83,7 @@ function classify_polyhex(hs)
     gr = grid(radius)
     hex2idx(h) = findfirst(x -> x == h, gr)
     idx = [hex2idx(h) for h in hs]
-    classify_polyhex(idx, gr)
+    classifypolyhex(idx, gr)
 end
 
 
@@ -142,7 +142,7 @@ function circleoflife()::Array{String}
               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(-1, 1, 0), Hex(0, -1, 1)],
               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, 0, -3)]]
 
-    [classify_polyhex(shape) for shape in shapes]
+    [classifypolyhex(shape) for shape in shapes]
 end
 
 """
@@ -218,7 +218,7 @@ function simulate(n_trials, n_tiles, radius)
 
         for g = distinct(groups)
             # indices (with respect to the grid) of tiles in group g
-            dat[classify_polyhex(idx[find(x -> x == g, groups)], gr)] += 1
+            dat[classifypolyhex(idx[find(x -> x == g, groups)], gr)] += 1
         end
     end
     dat
@@ -257,7 +257,7 @@ function deterministic(n_tiles, radius)
         assigngroups!(groups, aj, idx)
 
         for g = distinct(groups)
-            dat[classify_polyhex(idx[find(x -> x == g, groups)], gr)] += 1
+            dat[classifypolyhex(idx[find(x -> x == g, groups)], gr)] += 1
         end
     end
 
