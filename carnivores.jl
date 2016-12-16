@@ -199,6 +199,18 @@ function assigngroups!(groups::Array{Int}, adjacent::BitArray{2}, idx::Array{Int
     nothing
 end
 
+"""
+With respect to existing groups, what size shape would laying down a new
+tile produce?
+"""
+function newgroupsize(groups, adjacent, idx, new_i)
+    n = size(adjacent)[1]
+
+    ngs = 1
+    adj_groups = distinct(groups[find(x -> adjacent[new_i, x], idx)])
+    length(find(x -> x in adj_groups, groups)) + 1
+end
+
 function simulate(n_trials, n_tiles, radius)
     gr = grid(radius)
     grid_size = length(gr)
@@ -262,16 +274,4 @@ function deterministic(n_tiles, radius)
     end
 
     dat
-end
-
-#=
-For radii 1 to 7, find all ways to draw 3 hexes from the grid, and count the shapes.
-=#
-n_tiles = 4
-println("radius\tshape\tcounts")
-for radius in 1:5
-    dat = deterministic(n_tiles, radius)
-    for shape in circleoflife()
-        println(radius, "\t", shape, "\t", dat[shape])
-    end
 end
