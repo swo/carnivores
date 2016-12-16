@@ -2,6 +2,7 @@
 
 import Base.+, Base.-, Base.*#, Base.convert
 import StatsBase.sample, StatsBase.sample!
+using Iterators
 
 # Store cubic coordinates for each hex
 immutable Hex
@@ -27,7 +28,7 @@ Classify a polyhex (of size 1 to 4). The names used are:
  - For size 4, as per MathWorld (http://mathworld.wolfram.com/Polyhex.html) but with
     "long" prefixed to worm and wave
 """
-function classify_polyhex(hs::Array{Hex})::String
+function classify_polyhex(hs)::String
     # some can be classified just by the size of the polyhex
     if length(hs) == 1
         return "singleton"
@@ -73,59 +74,12 @@ dist(a::Hex, b::Hex)::Int = (abs(a.x - b.x) + abs(a.x + a.y - b.x - b.y) + abs(a
 """
 Center of mass of an array of hexes
 """
-com(hs::Array{Hex})::Array{Float64} = hex2cartesian(sum(hs)) / convert(Float64, length(hs))
+com(hs)::Array{Float64} = hex2cartesian(sum(hs)) / convert(Float64, length(hs))
 
 """
 Moment of intertia of an array of hexes
 """
-moi(hs::Array{Hex})::Float64 = sum([norm(com(hs) - hex2cartesian(h)) ^ 2 for h in hs])
-
-"""
-Break an array of hexes an array of arrays. Each array is a group of continguous
-hexes.
-"""
-function hex_groups(hs::Array{Hex})::Array{Array{Hex}}
-    groups = Array{Hex}[]
-    for h in hs
-        add_hex_to_groups!(groups, h)
-    end
-    groups
-end
-
-function add_hex_to_groups!(groups, hex)
-    for group in groups
-        for member in group
-            if dist(hex, member) == 1
-                push!(group, hex)
-                return nothing
-            end
-        end
-    end
-
-    push!(groups, [hex])
-    nothing
-end
-
-"""
-Run `n_trials` simulations by placing `n_tiles` hexes randomly in a space with
-a given radius (i.e., you can go `radius` steps away from the center).
-"""
-function simulate(n_trials::Int, n_tiles::Int, radius::Int)
-    # the possible grid of hexes
-    grid = [Hex(x, y, -x - y) for x in -radius:radius for y in max(-radius, -x - radius):min(radius, radius - x)]
-
-    # store a hash {polyhex name => # of times this shape occurs}
-    dat = Dict{String, Int}()
-
-    # pre-allocate the keys of the dictionary to avoid inferences
-    for k in circle_of_life()
-        dat[k] = 0
-    end
-
-    simulate_trials!(dat, grid, n_tiles, n_trials)
-
-    return dat
-end
+moi(hs)::Float64 = sum([norm(com(hs) - hex2cartesian(h)) ^ 2 for h in hs])
 
 """
 Actually do the sampling and classification
@@ -137,16 +91,8 @@ function simulate_trials!(dat, grid, n_tiles, n_trials::Int)
 
     for i in 1:n_trials
         # drawn tiles from the grid; put them into groups
-        sample!(grid, tiles, replace=false)
+        tiles = Set(sample(grid, n_tiles, replace=false))
         groups = hex_groups(tiles)
-        #hex_groups!(groups, tiles)
-
-        #=
-        for g in unique(groups)
-            c = classify_polyhex(tiles[find(x -> x == g, groups)])
-            dat[c] += 1
-        end
-        =#
 
         # characterize each group and add it to the output data
         for g in groups
@@ -159,24 +105,25 @@ end
 Return the names of the polyhexes in the Circle of Life. Use this as a verification
 of the names and classifications.
 """
-function circle_of_life()::Array{String}
-    shapes1 = [[Hex(0, 0, 0)]]
+function circleoflife()::Array{String}
+    shapes = [ # 1-hex shapes
+              Set([Hex(0, 0, 0)]),
+                 # 2-hex
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1)]),
+                 # 3-hexes
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, -1, -1)]),
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2)]),
+                 Set([Hex(0, 0, 0), Hex(-1, 0, 1), Hex(0, -1, 1)]),
+                 # 4-hexes
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(1, 1, -2)]),
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, -1, -1), Hex(3, -1, -2)]),
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, -1, -2)]),
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(1, -1, 0), Hex(2, -1, -1)]),
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(1, 1, -2), Hex(0, 2, -2)]),
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(-1, 1, 0), Hex(0, -1, 1)]),
+                 Set([Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, 0, -3)])]
 
-    shapes2 = [[Hex(0, 0, 0), Hex(1, 0, -1)]]
-
-    shapes3 = [[Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, -1, -1)],
-               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2)],
-               [Hex(0, 0, 0), Hex(-1, 0, 1), Hex(0, -1, 1)]]
-
-    shapes4 = [[Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(1, 1, -2)],
-               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, -1, -1), Hex(3, -1, -2)],
-               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, -1, -2)],
-               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(1, -1, 0), Hex(2, -1, -1)],
-               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(1, 1, -2), Hex(0, 2, -2)],
-               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(-1, 1, 0), Hex(0, -1, 1)],
-               [Hex(0, 0, 0), Hex(1, 0, -1), Hex(2, 0, -2), Hex(3, 0, -3)]]
-
-    [classify_polyhex(shape) for shape in vcat(shapes1, shapes2, shapes3, shapes4)]
+    [classify_polyhex(shape) for shape in shapes]
 end
 
 """
@@ -192,8 +139,80 @@ function report(n_trials, n_tiles, radius)
     end
 end
 
+#=
 println("radius\tshort wave\ttriangle\tshort bar")
 for radius in 1:20
-    dat = simulate(1000000, 3, radius)
+    dat = simulate(10000, 3, radius)
     println(radius, "\t", dat["short wave"], "\t", dat["triangle"], "\t", dat["short bar"])
 end
+=#
+
+function grid(radius::Int)::Array{Hex, 1}
+    [Hex(x, y, -x - y) for x in -radius:radius for y in max(-radius, -x - radius):min(radius, radius - x)]
+end
+
+function adjacencymatrix(grid::Array{Hex, 1})::BitArray{2}
+    n = length(grid)
+    adj = falses(n, n)
+    for i in 1:(n - 1)
+        for j in (i + 1):n
+            if dist(grid[i], grid[j]) == 1
+                adj[i, j] = true
+                adj[j, i] = true
+            end
+        end
+    end
+    adj
+end
+
+"""
+Break an array of hexes an array of arrays. Each array is a group of continguous
+hexes.
+"""
+function assigngroups(adjacent::BitArray{2}, idx::Array{Int})::Array{Int}
+    # initialize each tile in its own group
+    n = length(idx)
+    groups = Array(1:n)
+
+    for i in 1:(n - 1)
+        for j in (i + 1):n
+            if adjacent[idx[i], idx[j]] && groups[i] != groups[j]
+                # change of all of j's group to i's group
+                old_group = groups[j]
+                new_group = groups[i]
+
+                for k in 1:n
+                    if groups[k] == old_group
+                        groups[k] = new_group
+                    end
+                end
+            end
+        end
+    end
+    groups
+end
+
+function simulate(n_trials, n_tiles, radius)
+    gr = grid(radius)
+    aj = adjacencymatrix(gr)
+
+    dat = Dict{String, Int}()
+
+    for k in circleoflife()
+        dat[k] = 0
+    end
+
+    for trial_i = 1:n_trials
+        idx = sample(1:length(gr), n_tiles, replace=false)
+        groups = assigngroups(aj, idx)
+
+        for g = distinct(groups)
+            # indices (with respect to the grid) of tiles in group g
+            g_idx = idx[find(x -> x == g, groups)]
+            dat[classify_polyhex(gr[g_idx])] += 1
+        end
+    end
+    dat
+end
+
+report(1000, 3, 2)
