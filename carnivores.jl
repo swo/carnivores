@@ -72,6 +72,20 @@ function classify_polyhex(idx, grid)::String
     error("unrecognized shape of size $(length(idx)) with MOI $(moi(idx, grid))")
 end
 
+"""
+Classify a collection of hexes `hs`.
+"""
+function classify_polyhex(hs)
+    # This is janky: I find the minimum grid needed to fit all of these, find
+    # the indices of the hexes in that grid, and then pass those indices and
+    # grid to the other dispatch.
+    radius = maximum([maximum([abs(h.x), abs(h.y)]) for h in hs])
+    gr = grid(radius)
+    hex2idx(h) = findfirst(x -> x == h, gr)
+    idx = [hex2idx(h) for h in hs]
+    classify_polyhex(idx, gr)
+end
+
 
 """
 Distance between two hexes
@@ -253,11 +267,11 @@ end
 #=
 For radii 1 to 7, find all ways to draw 3 hexes from the grid, and count the shapes.
 =#
-n_tiles = 3
+n_tiles = 4
 println("radius\tshape\tcounts")
-for radius in 1:7
+for radius in 1:5
     dat = deterministic(n_tiles, radius)
-    for shape in ["singleton", "doubleton", "short wave", "short bar", "triangle"]
+    for shape in circleoflife()
         println(radius, "\t", shape, "\t", dat[shape])
     end
 end
