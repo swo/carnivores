@@ -172,20 +172,19 @@ function adjacencymatrix(grid::Array{Hex, 1})::BitArray{2}
     adj
 end
 
+function initializegroups!(groups::Array{Int}, n::Int)
+    for i in 1:n
+        groups[i] = i
+    end
+end
+
 """
 Assign values (in place) to groups array based on an adjacency matrix and a list
 of the indices (with respect to that matrix) of the tiles in question.
 """
-function assigngroups!(groups::Array{Int}, adjacent::BitArray{2}, idx::Array{Int})
-    # initialize each tile in its own group
-    if length(idx) != length(groups) error("bad length") end
-
-    for i = eachindex(groups)
-        groups[i] = i
-    end
-
-    for i in 1:(length(idx) - 1)
-        for j in (i + 1):length(idx)
+function assigngroups!(groups::Array{Int}, n::Int, adjacent::BitArray{2}, idx::Array{Int})
+    for i in 1:(n - 1)
+        for j in (i + 1):n
             if adjacent[idx[i], idx[j]] && groups[i] != groups[j]
                 # change of all of j's group to i's group
                 for k = eachindex(groups)
@@ -226,7 +225,8 @@ function simulate(n_trials, n_tiles, radius)
 
     for trial_i = 1:n_trials
         sample!(1:grid_size, idx, replace=false)
-        assigngroups!(groups, aj, idx)
+        initializegroups!(groups, n_tiles)
+        assigngroups!(groups, n_tiles, aj, idx)
 
         for g = distinct(groups)
             # indices (with respect to the grid) of tiles in group g
@@ -266,7 +266,8 @@ function deterministic(n_tiles, radius)
     end
 
     for idx = subsets(Array(1:grid_size), n_tiles)
-        assigngroups!(groups, aj, idx)
+        initializegroups!(groups, n_tiles)
+        assigngroups!(groups, n_tiles, aj, idx)
 
         for g = distinct(groups)
             dat[classifypolyhex(idx[find(x -> x == g, groups)], gr)] += 1
@@ -275,3 +276,6 @@ function deterministic(n_tiles, radius)
 
     dat
 end
+
+@time println(deterministic(3, 3))
+@time println(deterministic(3, 3))
