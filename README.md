@@ -41,9 +41,19 @@ I've relied heavily on this [outstanding post](http://www.redblobgames.com/grids
 
 ## To do
 
+### Technical
+
+- Move back to working with arrays or sets
 - Migrate to a module and separate code
-- Implement periodic boundary conditions?
-- Use more stones (10-20, but requiring that there are no 5-shapes)
-- Simulate interacting stones
-- General: how do player choice and "ease" of creation interact?
-- General: how about "sequential" constructions? e.g., what if it's easier to make one third shape than another when coming from different 2-shapes?
+- Make some unit tests
+
+### Simulate entire (random) games
+
+- Make easier step-wise group-building
+- Define capture rules
+- Allow for openings
+
+### General
+
+- How do player choice and "ease" of creation interact?
+- How about "sequential" constructions? e.g., what if it's easier to make one third shape than another when coming from different 2-shapes?
