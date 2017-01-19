@@ -35,6 +35,19 @@ class TestHexToCartesian:
         assert Hex(2, 1).to_cartesian().nearly_equals(Hex(2.5, 0.866025))
 
 
+class TestDistanceTo:
+    def test1(self):
+        assert Hex(0, 0).distance_to(Hex(4, -3)) == 4
+
+
 class TestHexSum:
     def test1(self):
         assert hex_sum([Hex(1, 1), Hex(1, -2)]) == Hex(2, -1)
+
+
+class TestCenterOfMass:
+    pass
+
+
+class TestMomentOfIntertia:
+    pass

@@ -31,5 +31,18 @@ class Hex:
     def to_cartesian(self):
         return Hex(self.coords[0] + 0.5 * self.coords[1], np.sqrt(3) / 2 * self.coords[1])
 
+    def distance_to(self, other):
+        return (sum(map(abs, self.coords - other.coords)) + abs(sum(self.coords) - sum(other.coords))) / 2
+
+    def adjacent_to(self, other):
+        return self.distance_to(other) == 1
+
 def hex_sum(hs):
     return sum(hs, Hex(0, 0))
+
+def center_of_mass(hs):
+    return sum([h.to_cartesian() for h in hs]) / len(hs)
+
+def moment_of_intertia(hs):
+    com = center_of_mass(hs)
+    return sum([sum((h - com).coords ** 2) for h in hs])
