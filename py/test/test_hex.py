@@ -22,3 +22,19 @@ class TestHexArithmetic:
 
     def test_sub(self):
         assert Hex(3, 3) - Hex(1, 2) == Hex(2, 1)
+
+
+class TestHexToCartesian:
+    def test_nearly_equals(self):
+        assert Hex(0, 0).nearly_equals(Hex(0 + 1e-7, 0 - 1e-7))
+
+    def test_not_nearly_equals(self):
+        assert not Hex(0, 0).nearly_equals(Hex(0 + 1e-5, 0))
+
+    def test1(self):
+        assert Hex(2, 1).to_cartesian().nearly_equals(Hex(2.5, 0.866025))
+
+
+class TestHexSum:
+    def test1(self):
+        assert hex_sum([Hex(1, 1), Hex(1, -2)]) == Hex(2, -1)

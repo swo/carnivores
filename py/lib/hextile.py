@@ -24,3 +24,12 @@ class Hex:
 
     def __truediv__(self, other):
         return Hex(*(self.coords / other))
+
+    def nearly_equals(self, other, epsilon=1e-6):
+        return max(map(abs, self.coords - other.coords)) < epsilon
+
+    def to_cartesian(self):
+        return Hex(self.coords[0] + 0.5 * self.coords[1], np.sqrt(3) / 2 * self.coords[1])
+
+def hex_sum(hs):
+    return sum(hs, Hex(0, 0))
