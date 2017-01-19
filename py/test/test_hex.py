@@ -13,3 +13,12 @@ class TestHexArithmetic:
 
     def test_add(self):
         assert Hex(1, 2) + Hex(0, -1) == Hex(1, 1)
+
+    def test_mul(self):
+        assert Hex(1, 2) * 3 == Hex(3, 6)
+
+    def test_div(self):
+        assert Hex(3, 3) / 3 == Hex(1, 1)
+
+    def test_sub(self):
+        assert Hex(3, 3) - Hex(1, 2) == Hex(2, 1)

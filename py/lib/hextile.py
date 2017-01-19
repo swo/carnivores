@@ -15,3 +15,12 @@ class Hex:
 
     def __add__(self, other):
         return Hex(*(self.coords + other.coords))
+
+    def __sub__(self, other):
+        return Hex(*(self.coords - other.coords))
+
+    def __mul__(self, other):
+        return Hex(*(self.coords * other))
+
+    def __truediv__(self, other):
+        return Hex(*(self.coords / other))
