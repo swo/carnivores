@@ -78,3 +78,12 @@ class TestLegal:
 
     def test_allowed_move(self):
         assert is_legal_move(grid(2), [Hex(0, 0), Hex(1, 0), Hex(-1, 0)], [], Hex(0, 1))
+
+
+class TestEvolve:
+    def test_raise_illegal(self):
+        with pytest.raises(RuntimeError):
+            evolve([Hex(0, 0), Hex(1, 0), Hex(-1, 0), Hex(0, 1)], [], Hex(0, -1))
+
+    def test_capture(self):
+        raise NotImplementedError
