@@ -64,7 +64,7 @@ class TestFollow:
 
 class TestLegal:
     def test_stone_already_placed(self):
-        raise NotImplementedError
+        assert not is_legal_move(grid(3), [Hex(0, 0)], [], Hex(0, 0))
 
     def test_stone_not_in_grid(self):
         raise NotImplementedError
