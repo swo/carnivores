@@ -19,6 +19,10 @@ def show_hexes(grid_radius, hex_chars, empty_hex='.'):
 
     return [''.join(l) for l in reversed(lines)]
 
+def print_hexes(grid_radius, hex_chars, empty_hex='.'):
+    for l in show_hexes(grid_radius, hex_chars, empty_hex=empty_hex):
+        print(l)
+
 def hex_to_line_char(r, h):
     hex_x, hex_y = [int(x) for x in h.coords]
     z = hex_x + hex_y
@@ -31,6 +35,9 @@ def hex_to_line_char(r, h):
 
 def any_adjacent_to(group, h):
     return any([m.distance_to(h) == 1 for m in group])
+
+def groups_adjacent(group1, group2):
+    return any([x.distance_to(y) == 1 for x in group1 for y in group2])
 
 def add_hex_to_groups(groups, h):
     adjacent_groups = [g for g in groups if any_adjacent_to(g, h)]
@@ -138,5 +145,21 @@ def evolve(gr, stones1, stones2, new_stone1):
     if not is_legal_move(gr, stones1, stones2, new_stone1):
         raise RuntimeError('illegal move')
 
-    pass
+    groups1 = hex_groups(stones1 + [new_stone1])
+    groups2 = hex_groups(stones2)
 
+    # check which of the opponents' groups are adjacent to any of our groups
+    consumed = []
+    for group1 in groups1:
+        for group2 in groups2:
+            if groups_adjacent(group1, group2):
+                predator = classify(group1)
+                prey = classify(group2)
+                if follows(circle_of_life(), predator, prey):
+                    if group2 not in consumed:
+                        consumed.append(group2)
+
+    new_stones1 = [x for g in groups1 for x in g]
+    new_stones2 = [x for g in groups2 for x in g if g not in consumed]
+
+    return (new_stones1, new_stones2)

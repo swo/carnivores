@@ -111,7 +111,7 @@ class TestLegal:
 class TestEvolve:
     def test_raise_illegal(self):
         with pytest.raises(RuntimeError):
-            evolve([Hex(0, 0), Hex(1, 0), Hex(-1, 0), Hex(0, 1)], [], Hex(0, -1))
+            evolve(grid(1), [Hex(0, 0), Hex(1, 0), Hex(-1, 0), Hex(0, 1)], [], Hex(0, -1))
 
     def test_capture(self):
-        raise NotImplementedError
+        assert evolve(grid(1), [Hex(0, 0)], [Hex(1, 0)], Hex(-1, 0)) == ([Hex(0, 0), Hex(-1, 0)], [])
