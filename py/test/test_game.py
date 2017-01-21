@@ -35,3 +35,16 @@ class TestGroups:
 class TestCircle:
     def test(self):
         assert circle_of_life() == ['singleton', 'doubleton', 'short wave', 'short bar', 'triangle', 'pistol', 'long wave', 'worm', 'bee', 'arch', 'propellor', 'long bar']
+
+
+class TestDeterministic:
+    def test_n_choices(self):
+        for r in range(1, 3):
+            for n in range(4):
+                gr = grid(r)
+                res = deterministic_appearances(n, r)
+                n_res = sum(res.values())
+                assert n_res == len(list(itertools.combinations(gr, n)))
+
+    def test_2_1(self):
+        assert deterministic_appearances(2, 1) == {('doubleton',): 12, ('singleton', 'singleton'): 9}

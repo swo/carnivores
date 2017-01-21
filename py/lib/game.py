@@ -2,6 +2,8 @@ import sys, os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 from hextile import *
 
+import itertools
+
 def any_adjacent_to(group, h):
     return any([m.distance_to(h) == 1 for m in group])
 
@@ -68,15 +70,25 @@ def circle_of_life():
          [Hex(0, 0), Hex(1, 0), Hex(2, 0), Hex(3, 0)]]]
 
 def grid(radius):
-    return [Hex(x, y) for x in range(-radius, radius + 1) for y in range(max(-radius, -(x + radius)), min(radius, radius - x) + 1)]
-
-def choices():
-    # from n items pick k
-    pass
+    return [Hex(x, y) \
+            for x in range(-radius, radius + 1) \
+            for y in range(max(-radius, -(x + radius)), min(radius, radius - x) + 1)]
 
 def count_times():
     # something appears in a list
     pass
+
+def deterministic_appearances(n_tiles, grid_radius):
+    gr = grid(grid_radius)
+    dat = {}
+    for chosen_tiles in itertools.combinations(gr, n_tiles):
+        c = tuple(sorted([classify(g) for g in hex_groups(chosen_tiles)]))
+        if c in dat:
+            dat[c] += 1
+        else:
+            dat[c] = 1
+
+    return dat
 
 def follows():
     # does x follow y in a list?
