@@ -67,13 +67,14 @@ class TestLegal:
         assert not is_legal_move(grid(3), [Hex(0, 0)], [], Hex(0, 0))
 
     def test_stone_not_in_grid(self):
-        raise NotImplementedError
+        assert not is_legal_move(grid(1), [], [], Hex(4, 0))
 
     def test_groups_already_too_large(self):
-        raise NotImplementedError
+        with pytest.raises(RuntimeError):
+            is_legal_move(grid(2), [Hex(0, 0), Hex(1, 0), Hex(-1, 0), Hex(0, 1), Hex(0, -1)], [], Hex(2, -2))
 
     def test_new_group_too_large(self):
-        raise NotImplementedError
+        assert not is_legal_move(grid(2), [Hex(0, 0), Hex(1, 0), Hex(-1, 0), Hex(0, 1)], [], Hex(0, -1))
 
     def test_allowed_move(self):
-        raise NotImplementedError
+        assert is_legal_move(grid(2), [Hex(0, 0), Hex(1, 0), Hex(-1, 0)], [], Hex(0, 1))

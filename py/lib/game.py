@@ -104,6 +104,8 @@ def is_legal_move(gr, stones1, stones2, new_stone1):
         raise RuntimeError('already ill-formed groups')
 
     new_groups1 = add_hex_to_groups(groups1, new_stone1)
+    print('groups', groups1)
+    print('new groups', new_groups1)
     if max([len(g) for g in new_groups1]) > 4:
         return False
 
