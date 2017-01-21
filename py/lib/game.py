@@ -69,3 +69,18 @@ def circle_of_life():
 
 def grid(radius):
     return [Hex(x, y) for x in range(-radius, radius + 1) for y in range(max(-radius, -(x + radius)), min(radius, radius - x) + 1)]
+
+def choices():
+    # from n items pick k
+    pass
+
+def count_times():
+    # something appears in a list
+    pass
+
+def follows():
+    # does x follow y in a list?
+    pass
+
+def evolve():
+    pass
