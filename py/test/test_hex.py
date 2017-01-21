@@ -46,7 +46,8 @@ class TestHexSum:
 
 
 class TestCenterOfMass:
-    pass
+    def test_line(self):
+        assert center_of_mass([Hex(0, 1), Hex(0, 0), Hex(0, -1)]) == Hex(0, 0)
 
 
 class TestMomentOfIntertia:

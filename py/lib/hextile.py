@@ -25,6 +25,9 @@ class Hex:
     def __truediv__(self, other):
         return Hex(*(self.coords / other))
 
+    # def __lt__(self, other):
+    #     return self.coords < other.coords
+
     def nearly_equals(self, other, epsilon=1e-6):
         return max(map(abs, self.coords - other.coords)) < epsilon
 
@@ -41,8 +44,8 @@ def hex_sum(hs):
     return sum(hs, Hex(0, 0))
 
 def center_of_mass(hs):
-    return sum([h.to_cartesian() for h in hs]) / len(hs)
+    return hex_sum([h.to_cartesian() for h in hs]) / len(hs)
 
 def moment_of_intertia(hs):
     com = center_of_mass(hs)
-    return sum([sum((h - com).coords ** 2) for h in hs])
+    return sum([sum((h.to_cartesian() - com).coords ** 2) for h in hs])

@@ -30,3 +30,8 @@ class TestGroups:
 
     def test_group(self):
         assert hex_groups([Hex(0, 0), Hex(1, 0), Hex(-2, 0)]) == [[Hex(0, 0), Hex(1, 0)], [Hex(-2, 0)]]
+
+
+class TestCircle:
+    def test(self):
+        assert circle_of_life() == ['singleton', 'doubleton', 'short wave', 'short bar', 'triangle', 'pistol', 'long wave', 'worm', 'bee', 'arch', 'propellor', 'long bar']
