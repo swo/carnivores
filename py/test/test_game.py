@@ -48,3 +48,15 @@ class TestDeterministic:
 
     def test_2_1(self):
         assert deterministic_appearances(2, 1) == {('doubleton',): 12, ('singleton', 'singleton'): 9}
+
+
+class TestFollow:
+    def test_simple(self):
+        lst = ['a', 'b', 'c', 'd']
+        assert follows(lst, 'b', 'a')
+        assert follows(lst, 'c', 'b')
+        assert follows(lst, 'd', 'c')
+
+    def test_loop(self):
+        lst = ['a', 'b', 'c', 'd']
+        assert follows(lst, 'a', 'd')

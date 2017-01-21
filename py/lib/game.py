@@ -74,10 +74,6 @@ def grid(radius):
             for x in range(-radius, radius + 1) \
             for y in range(max(-radius, -(x + radius)), min(radius, radius - x) + 1)]
 
-def count_times():
-    # something appears in a list
-    pass
-
 def deterministic_appearances(n_tiles, grid_radius):
     gr = grid(grid_radius)
     dat = {}
@@ -90,9 +86,11 @@ def deterministic_appearances(n_tiles, grid_radius):
 
     return dat
 
-def follows():
-    # does x follow y in a list?
-    pass
+def follows(lst, b, a):
+    '''Does b follow a in lst?'''
+    ai = lst.index(a)
+    bi = lst.index(b)
+    return bi == ai + 1 or (bi == 0 and ai == len(lst) - 1)
 
 def evolve():
     pass
