@@ -4,6 +4,31 @@ from hextile import *
 
 import itertools
 
+def show_hexes(grid_radius, hex_chars, empty_hex='.'):
+    line_diameter = 2 * grid_radius + 1
+    char_diameter = 4 * grid_radius + 1
+    lines = [[' '] * char_diameter for i in range(line_diameter)]
+
+    for h in grid(grid_radius):
+        l, p = hex_to_line_char(grid_radius, h)
+        lines[l][p] = empty_hex
+
+    for h, c in hex_chars:
+        l, p = hex_to_line_char(grid_radius, h)
+        lines[l][p] = c
+
+    return [''.join(l) for l in reversed(lines)]
+
+def hex_to_line_char(r, h):
+    hex_x, hex_y = [int(x) for x in h.coords]
+    z = hex_x + hex_y
+
+    line = r + z
+    char = 2 * hex_x - z + 2 * r
+
+    return (line, char)
+
+
 def any_adjacent_to(group, h):
     return any([m.distance_to(h) == 1 for m in group])
 
@@ -109,8 +134,8 @@ def is_legal_move(gr, stones1, stones2, new_stone1):
 
     return True
 
-def evolve(stones1, stones2, new_stone1):
-    if not is_legal_move(new_stone1):
+def evolve(gr, stones1, stones2, new_stone1):
+    if not is_legal_move(gr, stones1, stones2, new_stone1):
         raise RuntimeError('illegal move')
 
     pass

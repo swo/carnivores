@@ -17,6 +17,34 @@ class TestGrid:
             assert len(grid(r - 1)) == 1 + 6 * (r * (r - 1) / 2)
 
 
+class TestHexToLineChar:
+    def test1(self):
+        assert hex_to_line_char(1, Hex(0, 0)) == (1, 2)
+
+    def test2(self):
+        assert hex_to_line_char(1, Hex(1, -1)) == (1, 4)
+
+    def test3(self):
+        assert hex_to_line_char(1, Hex(1, 0)) == (2, 3)
+
+    def test4(self):
+        assert hex_to_line_char(1, Hex(0, -1)) == (0, 3)
+
+
+class TestShow:
+    def test1(self):
+        assert show_hexes(0, []) == ['.']
+
+    def test2(self):
+        assert show_hexes(0, [(Hex(0, 0), 'x')]) == ['x']
+
+    def test_empty_1(self):
+        assert show_hexes(1, []) == [' . . ', '. . .', ' . . ']
+
+    def test3(self):
+        assert show_hexes(1, [(Hex(0, 0), 'c'), (Hex(1, -1), 'r'), (Hex(1, 0), 'n')]) == [' . n ', '. c r', ' . . ']
+
+
 class TestGroups:
     def test_any_adjacent(self):
         assert any_adjacent_to([Hex(0, 0), Hex(1, 0)], Hex(0, 1))
