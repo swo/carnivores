@@ -60,3 +60,20 @@ class TestFollow:
     def test_loop(self):
         lst = ['a', 'b', 'c', 'd']
         assert follows(lst, 'a', 'd')
+
+
+class TestLegal:
+    def test_stone_already_placed(self):
+        raise NotImplementedError
+
+    def test_stone_not_in_grid(self):
+        raise NotImplementedError
+
+    def test_groups_already_too_large(self):
+        raise NotImplementedError
+
+    def test_new_group_too_large(self):
+        raise NotImplementedError
+
+    def test_allowed_move(self):
+        raise NotImplementedError

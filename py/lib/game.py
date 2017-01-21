@@ -92,5 +92,22 @@ def follows(lst, b, a):
     bi = lst.index(b)
     return bi == ai + 1 or (bi == 0 and ai == len(lst) - 1)
 
-def evolve():
+def is_legal_move(gr, stones1, stones2, new_stone1):
+    if new_stone1 in stones1 or new_stone1 in stones2:
+        return False
+
+    if new_stone1 not in gr:
+        return False
+
+    groups1 = hex_groups(stones1)
+    if max([len(g) for g in groups1]) > 4:
+        raise RuntimeError('already ill-formed groups')
+
+    new_groups1 = add_hex_to_groups(groups1, new_stone1)
+    if max([len(g) for g in new_groups1]) > 4:
+        return False
+
+    return True
+
+def evolve(stones1, stones2, new_stone1):
     pass
